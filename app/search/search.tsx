@@ -1,15 +1,77 @@
 import { useState } from "react";
+import { AdvancedMarker, APIProvider, Map, Pin } from '@vis.gl/react-google-maps';
+import type { MapCameraChangedEvent } from '@vis.gl/react-google-maps';
+import { Circle } from "../components/circle";
+
 
 export function Search() {
   const [query, setQuery] = useState("");
   const [distance, setDistance] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
+  const [location, setLocation] = useState({ lat: 0, lng: 0 });
+  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
+
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  const defaultAddress = import.meta.env.VITE_DEFAULT_ADDRESS || '';
+  const mapId = import.meta.env.VITE_MAP_ID || '';
+
+  type MyLocation = { key: string, location: google.maps.LatLngLiteral }
 
   const handleSearch = () => {
     setIsLoading(true);
     // TODO: Implement search functionality
     console.log(`Searching for ${query} within ${distance}km`);
+  };  
+
+  const fetchMapCenter = () => {   
+    console.log(`Retrieving default location ${defaultAddress} with api key ${apiKey}`);
+    fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${defaultAddress}&key=${apiKey}`
+    )
+      .then(response => response.json())
+      .then(data => {
+        if (data.results && data.results.length > 0) {
+          console.log("Geocoding response:", data.results[0].geometry.location);
+          setMapCenter({ 
+            lat: data.results[0].geometry.location.lat, 
+            lng: data.results[0].geometry.location.lng 
+          });
+          setLocation({ 
+            lat: data.results[0].geometry.location.lat, 
+            lng: data.results[0].geometry.location.lng 
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching default location:', error);
+      });
   };
+
+  const handleMapsApiLoad = () => {
+    console.log('Maps API has loaded');
+    fetchMapCenter();    
+  };
+
+  const MyLocationMarker = (props: {myLocation: MyLocation}) => {
+    return (
+      <>
+        <Circle
+          radius={distance * 1000}
+          center={props.myLocation.location}
+          strokeColor={'#0c4cb3'}
+          strokeOpacity={1}
+          strokeWeight={3}
+          fillColor={'#3b82f6'}
+          fillOpacity={0.3}
+        />
+        <AdvancedMarker
+          key={props.myLocation.key}
+          position={props.myLocation.location}>
+            <Pin background={'#FBBC04'} glyphColor={'#000'} borderColor={'#000'} />
+        </AdvancedMarker>
+      </>
+    )
+  }
 
   return (
     <main className="flex items-center justify-center pt-16 pb-4">
@@ -34,7 +96,10 @@ export function Search() {
               value={distance}
               min={1}
               className="w-20 rounded-lg border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-800"
-              onChange={(e) => setDistance(Number(e.target.value))}
+              onChange={(e) => {
+                const newDistance = Number(e.target.value);
+                setDistance(newDistance);
+              }}
             />
             <span className="text-gray-700 dark:text-gray-200">km</span>
             <br />
@@ -45,6 +110,21 @@ export function Search() {
             >
               {isLoading ? "Searching..." : "Find products"}
             </button>
+          </div>
+          <div className="fixed bottom-0 left-0 right-0 h-[60vh]">
+            <APIProvider apiKey={apiKey} onLoad={handleMapsApiLoad}>
+              <Map
+                defaultZoom={13}
+                defaultCenter={mapCenter}
+                center={mapCenter}
+                mapId={mapId}
+                onCameraChanged={(ev: MapCameraChangedEvent) => {
+                  console.log('Camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom);
+                  setMapCenter(ev.detail.center);
+                }}>
+                  <MyLocationMarker myLocation={{ key: 'Home', location: location }} />
+                </Map>
+            </APIProvider>
           </div>
         </div>
       </div>
