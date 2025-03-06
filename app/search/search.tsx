@@ -14,6 +14,7 @@ export function Search() {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const defaultAddress = import.meta.env.VITE_DEFAULT_ADDRESS || '';
   const mapId = import.meta.env.VITE_MAP_ID || '';
+  const coreApiUrl = import.meta.env.VITE_CORE_API_URL || '';
 
   type MyLocation = { key: string, location: google.maps.LatLngLiteral }
 
@@ -23,24 +24,21 @@ export function Search() {
     console.log(`Searching for ${query} within ${distance}km`);
   };  
 
-  const fetchMapCenter = () => {   
-    console.log(`Retrieving default location ${defaultAddress} with api key ${apiKey}`);
-    fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${defaultAddress}&key=${apiKey}`
-    )
+  const initializeMap = () => { 
+    // Fetch the default location using the default address
+    const url = `${coreApiUrl}/getLatLngByAddress?address=${defaultAddress}`;
+    fetch(url)
       .then(response => response.json())
       .then(data => {
-        if (data.results && data.results.length > 0) {
-          console.log("Geocoding response:", data.results[0].geometry.location);
-          setMapCenter({ 
-            lat: data.results[0].geometry.location.lat, 
-            lng: data.results[0].geometry.location.lng 
-          });
-          setLocation({ 
-            lat: data.results[0].geometry.location.lat, 
-            lng: data.results[0].geometry.location.lng 
-          });
-        }
+        //set both the location of the user and the cetner of the map to the location of the default address
+        setLocation({ 
+          lat: data.lat, 
+          lng: data.lng 
+        });
+        setMapCenter({
+          lat: data.lat,
+          lng: data.lng
+        });
       })
       .catch(error => {
         console.error('Error fetching default location:', error);
@@ -49,7 +47,7 @@ export function Search() {
 
   const handleMapsApiLoad = () => {
     console.log('Maps API has loaded');
-    fetchMapCenter();    
+    initializeMap();    
   };
 
   const MyLocationMarker = (props: {myLocation: MyLocation}) => {
@@ -119,7 +117,6 @@ export function Search() {
                 center={mapCenter}
                 mapId={mapId}
                 onCameraChanged={(ev: MapCameraChangedEvent) => {
-                  console.log('Camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom);
                   setMapCenter(ev.detail.center);
                 }}>
                   <MyLocationMarker myLocation={{ key: 'Home', location: location }} />
