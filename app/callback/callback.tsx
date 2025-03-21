@@ -65,16 +65,14 @@ export default function CallbackPage() {
         }
 
         // Store tokens securely
-        sessionStorage.setItem('access_token', tokens.access_token);
-        if (tokens.refresh_token) {
-          sessionStorage.setItem('refresh_token', tokens.refresh_token);
-        }
+        localStorage.setItem('access_token', tokens.access_token);
+        localStorage.setItem('refresh_token', tokens.refresh_token);
 
         // Clear the state from session storage after successful exchange
         sessionStorage.removeItem('oauth_state');
 
         // Verify token is stored before navigation
-        const storedToken = sessionStorage.getItem('access_token');
+        const storedToken = localStorage.getItem('access_token');
         if (storedToken === tokens.access_token) {
           console.log("login successful")
           setError(null); // Clear error to indicate success

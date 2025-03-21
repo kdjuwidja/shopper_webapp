@@ -1,15 +1,126 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { InitializeUserProfile } from './components/InitializeUserProfile';
+
+interface UserProfile {
+  id: string;
+  postal_code: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function MemberHome() {
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [showPostalCodeModal, setShowPostalCodeModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const handleUpdate = () => {
+    setShowPostalCodeModal(true);
+  };
+
+  const createOrUpdateUserProfile = async (postalCode: string) => {
+    try {
+      // Don't submit if the postal code hasn't changed
+      console.log("userProfile", userProfile)
+      if (userProfile && userProfile.postal_code === postalCode) {
+        setShowPostalCodeModal(false);
+        return;
+      }
+
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/userprofile`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ postal_code: postalCode })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create or update user profile');
+      }
+
+      const data = await response.json();
+      setUserProfile(data);
+      setShowPostalCodeModal(false);
+    } catch (error) {
+      console.error('Error creating or updating user profile:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+          throw new Error('No access token found');
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/userprofile`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setShowPostalCodeModal(true);
+            setLoading(false);
+            return;
+          }
+          throw new Error('Failed to fetch user profile');
+        }
+
+        const data = await response.json();
+        setUserProfile(data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center', 
-      justifyContent: 'center',
-      minHeight: '100vh'
-    }}>
-      <h1>Hello World</h1>
+    <div className="min-h-screen">
+      {loading ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <h1>Loading...</h1>
+        </div>
+      ) : (
+        <>
+          {showPostalCodeModal && <InitializeUserProfile onSubmit={createOrUpdateUserProfile} />}
+          {userProfile && (
+            <div className="w-full bg-white dark:bg-gray-800 shadow">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                  <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome!</h1>
+                  <div className="flex items-center space-x-4">
+                    <p className="text-gray-600 dark:text-gray-300">
+                      Postal Code: <span className="font-medium">{userProfile.postal_code}</span>
+                    </p>
+                    <button
+                      onClick={handleUpdate}
+                      className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 
+                               text-white font-medium rounded-md 
+                               transition-colors duration-200"
+                    >
+                      Update
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
