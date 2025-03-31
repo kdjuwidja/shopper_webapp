@@ -1,100 +1,21 @@
-# Welcome to React Router!
+# AI Shopper Depot Web Application
 
-A modern, production-ready template for building full-stack React applications using React Router.
+## Overview
+This web application is built using:
+- VITE
+- React Router v7
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Environment Setup
+To run the application, you need to create a `.env` file in the root directory with the following environment variables:
 
-## Features
+### Google Maps Configuration (Deprecated for now, until we introduce google map features)
+- `VITE_GOOGLE_MAPS_API_KEY`: Your Google Maps API key
+- `VITE_MAP_ID`: Your Google Maps ID
+- `VITE_DEFAULT_ADDRESS`: Your default location
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
-
-```bash
-npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
-npm run dev
-```
-
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-This template includes three Dockerfiles optimized for different package managers:
-
-- `Dockerfile` - for npm
-- `Dockerfile.pnpm` - for pnpm
-- `Dockerfile.bun` - for bun
-
-To build and run using Docker:
-
-```bash
-# For npm
-docker build -t my-app .
-
-# For pnpm
-docker build -f Dockerfile.pnpm -t my-app .
-
-# For bun
-docker build -f Dockerfile.bun -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+### OAuth2 Configuration
+- `VITE_CORE_API_URL`: Core API URL (default: `http://localhost:8080`)
+- `VITE_TOKEN_URL`: OAuth2 token claim URL (default: `http://localhost:9096/token`)
+- `VITE_AUTH_URL`: OAuth2 authorization URL (default: `http://localhost:9096/authorize`)
+- `VITE_CLIENT_ID`: OAuth2 client ID (default: `82ce1a881b304775ad288e57e41387f3`)
+- `VITE_CLIENT_SECRET`: OAuth2 client secret (default: `my_secret`)
