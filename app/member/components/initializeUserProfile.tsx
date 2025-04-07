@@ -1,4 +1,4 @@
-import type { UserProfile } from '../memberHome';
+import type { UserProfile } from '../../common/model/userprofile';
 import { useInitializeUserProfile } from './initializeUserProfileLogic';
 
 interface InitializeUserProfileProps {

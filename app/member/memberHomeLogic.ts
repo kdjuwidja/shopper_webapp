@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { UserProfile } from './memberHome';
+import type { UserProfile } from '../common/model/userprofile';
 
 export function useMemberHome() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
