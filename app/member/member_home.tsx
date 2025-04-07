@@ -32,7 +32,7 @@ export default function MemberHome() {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/user`, {
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -61,7 +61,7 @@ export default function MemberHome() {
           throw new Error('No access token found');
         }
 
-        const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/user`, {
+        const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
