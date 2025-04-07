@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AdvancedMarker, APIProvider, Map, Pin } from '@vis.gl/react-google-maps';
 import type { MapCameraChangedEvent } from '@vis.gl/react-google-maps';
-import { Circle } from "../components/circle";
+import { Circle } from "./components/circle";
 
 
 export function Search() {
