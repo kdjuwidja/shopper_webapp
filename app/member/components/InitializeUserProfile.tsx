@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { UserProfile } from '../member_home';
 
 interface InitializeUserProfileProps {
-  onSubmit: (postalCode: string) => void;
+  onSubmit: (nickname: string, postalCode: string) => void;
+  onCancel: () => void;
+  userProfile?: UserProfile | null;
 }
 
 const isValidPostalCode = (code: string): boolean => {
@@ -17,27 +20,49 @@ const isValidPostalCode = (code: string): boolean => {
   return true;
 };
 
-export function InitializeUserProfile({ onSubmit }: InitializeUserProfileProps) {
+export function InitializeUserProfile({ onSubmit, onCancel, userProfile }: InitializeUserProfileProps) {
+  const [nickname, setNickname] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (userProfile) {
+      setNickname(userProfile.nickname);
+      setPostalCode(userProfile.postal_code);
+    }
+  }, [userProfile]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nickname) {
+      setError('Please enter a nickname');
+      return;
+    }
     if (!isValidPostalCode(postalCode)) {
       setError('Invalid postal code format. Must be 6 characters with letters in odd positions and numbers in even positions (e.g., A1B2C3)');
       return;
     }
     setError('');
-    onSubmit(postalCode);
+    onSubmit(nickname, postalCode);
   };
 
   return (
     <div className="fixed inset-0 bg-black/75 dark:bg-black/90 flex items-center justify-center">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg max-w-md w-full shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Welcome!</h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-6">Please enter your postal code to continue:</p>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">Please enter your details to continue:</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="Enter your nickname"
+              className="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 
+                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white 
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       placeholder-gray-400 dark:placeholder-gray-500 mb-4"
+            />
             <input
               type="text"
               value={postalCode}
@@ -55,14 +80,25 @@ export function InitializeUserProfile({ onSubmit }: InitializeUserProfileProps) 
               </p>
             )}
           </div>
-          <button
-            type="submit"
-            className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 
-                     text-white font-medium rounded-md 
-                     transition-colors duration-200"
-          >
-            Submit
-          </button>
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 
+                       text-gray-800 font-medium rounded-md 
+                       transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 
+                       text-white font-medium rounded-md 
+                       transition-colors duration-200"
+            >
+              Submit
+            </button>
+          </div>
         </form>
       </div>
     </div>

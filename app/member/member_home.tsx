@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { InitializeUserProfile } from './components/InitializeUserProfile';
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
+  nickname: string;
   postal_code: string;
   created_at: string;
   updated_at: string;
@@ -18,11 +19,12 @@ export default function MemberHome() {
     setShowPostalCodeModal(true);
   };
 
-  const createOrUpdateUserProfile = async (postalCode: string) => {
+  const createOrUpdateUserProfile = async (nickname: string, postalCode: string) => {
     try {
-      // Don't submit if the postal code hasn't changed
-      console.log("userProfile", userProfile)
-      if (userProfile && userProfile.postal_code === postalCode) {
+      // Don't submit if neither the postal code nor nickname has changed
+      if (userProfile && 
+          userProfile.postal_code === postalCode && 
+          userProfile.nickname === nickname) {
         setShowPostalCodeModal(false);
         return;
       }
@@ -38,15 +40,22 @@ export default function MemberHome() {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ postal_code: postalCode })
+        body: JSON.stringify({ 
+          nickname: nickname,
+          postal_code: postalCode 
+        })
       });
 
       if (!response.ok) {
         throw new Error('Failed to create or update user profile');
       }
-
-      const data = await response.json();
-      setUserProfile(data);
+     
+      // Only update the userProfile state after confirming the API call was successful
+      setUserProfile(prev => ({
+        ...prev!,
+        nickname: nickname,
+        postal_code: postalCode
+      }));
       setShowPostalCodeModal(false);
     } catch (error) {
       console.error('Error creating or updating user profile:', error);
@@ -96,12 +105,16 @@ export default function MemberHome() {
         </div>
       ) : (
         <>
-          {showPostalCodeModal && <InitializeUserProfile onSubmit={createOrUpdateUserProfile} />}
+          {showPostalCodeModal && <InitializeUserProfile 
+            onSubmit={createOrUpdateUserProfile} 
+            onCancel={() => setShowPostalCodeModal(false)}
+            userProfile={userProfile} 
+          />}
           {userProfile && (
             <div className="w-full bg-white dark:bg-gray-800 shadow">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                  <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome!</h1>
+                  <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome, {userProfile.nickname}!</h1>
                   <div className="flex items-center space-x-4">
                     <p className="text-gray-600 dark:text-gray-300">
                       Postal Code: <span className="font-medium">{userProfile.postal_code}</span>
