@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { UserProfile } from '../member_home';
+import type { UserProfile } from '../memberHome';
 
 interface InitializeUserProfileProps {
   onSubmit: (nickname: string, postalCode: string) => void;

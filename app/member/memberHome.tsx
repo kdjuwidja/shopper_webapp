@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { InitializeUserProfile } from './components/InitializeUserProfile';
+import { InitializeUserProfile } from './components/initializeUserProfile';
 
 export interface UserProfile {
   id: string;

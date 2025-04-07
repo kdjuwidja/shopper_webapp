@@ -19,6 +19,6 @@ export default [
   },
   {
     path: "/member",
-    file: "member/member_home.tsx"
+    file: "member/memberHome.tsx"
   }
 ] satisfies RouteConfig;
