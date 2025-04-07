@@ -82,6 +82,8 @@ export default function CallbackPage() {
         }
       } catch (error) {
         console.error('Token exchange error:', error);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         setError('Failed to complete authentication');
         return false;
       }
@@ -92,13 +94,12 @@ export default function CallbackPage() {
 
   useEffect(() => {
     if (error) {
-      navigate('/error', { state: { message: error } });
+      console.log("redirecting to login with error:", error);
+      navigate(`/login?error=${encodeURIComponent("User name or password is incorrect.")}`);
     } else {
-      setTimeout(() => {
-        navigate('/member');
-      }, 2000);
+      navigate('/member');
     }
-  }, [error, navigate]);
+  }, [error]);
 
   return (
     <>

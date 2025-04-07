@@ -9,14 +9,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
-      // If there's an error, display it and don't redirect
-      if (error) {
-        return; // Don't redirect if there's an error
-      }
-
       // Check if we have a valid access token
-      const accessToken = sessionStorage.getItem('access_token');
-      
+      const accessToken = localStorage.getItem('access_token');
+      console.log("accessToken", accessToken)
+
       if (!accessToken) {
         // Generate random state for CSRF protection
         const state = Math.random().toString(36).substring(2, 15) + 
@@ -32,6 +28,9 @@ export default function LoginPage() {
         authUrl.searchParams.append('redirect_uri', `${window.location.origin}/callback`);
         authUrl.searchParams.append('state', state);
         authUrl.searchParams.append('scope', 'profile');
+        if (error) {
+          authUrl.searchParams.append('error', error);
+        }
 
         // Redirect to authorization endpoint
         window.location.href = authUrl.toString();
@@ -44,7 +43,7 @@ export default function LoginPage() {
     };
 
     checkAuthAndRedirect();
-  }, [navigate, error]);
+  }, []);
 
   return (
     <div style={{ 
