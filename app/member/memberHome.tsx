@@ -1,6 +1,6 @@
-import { InitializeUserProfile } from './components/initializeUserProfile';
 import { CreateShopList } from './components/createShopList';
 import { ConfirmDialog } from './components/confirmDialog';
+import { TopBar } from './components/topBar';
 import { useMemberHome } from './memberHomeLogic';
 import { useState } from 'react';
 
@@ -16,13 +16,10 @@ export default function MemberHome() {
   const {
     userProfile,
     shopLists,
-    showPostalCodeModal,
     loading,
-    handleUpdate,
-    createOrUpdateUserProfile,
-    setShowPostalCodeModal,
     createShopList,
-    leaveShopList
+    leaveShopList,
+    fetchShopLists
   } = useMemberHome();
 
   const [showCreateShopList, setShowCreateShopList] = useState(false);
@@ -48,6 +45,11 @@ export default function MemberHome() {
     }
   };
 
+  const handleProfileUpdate = () => {
+    // Refresh shop lists when profile is updated
+    fetchShopLists();
+  };
+
   return (
     <div className="min-h-screen">
       {loading ? (
@@ -56,11 +58,6 @@ export default function MemberHome() {
         </div>
       ) : (
         <>
-          {showPostalCodeModal && <InitializeUserProfile 
-            onSubmit={createOrUpdateUserProfile} 
-            onCancel={() => setShowPostalCodeModal(false)}
-            userProfile={userProfile} 
-          />}
           {showCreateShopList && (
             <CreateShopList
               onSubmit={handleCreateShopList}
@@ -78,26 +75,10 @@ export default function MemberHome() {
           />
           {userProfile && (
             <>
-              <div className="w-full bg-white dark:bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="flex justify-between items-center h-16">
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome, {userProfile.nickname}!</h1>
-                    <div className="flex items-center space-x-4">
-                      <p className="text-gray-600 dark:text-gray-300">
-                        Postal Code: <span className="font-medium">{userProfile.postal_code}</span>
-                      </p>
-                      <button
-                        onClick={handleUpdate}
-                        className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 
-                                 text-white font-medium rounded-md 
-                                 transition-colors duration-200"
-                      >
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <TopBar 
+                initialUserProfile={userProfile} 
+                onProfileUpdate={handleProfileUpdate}
+              />
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex justify-between items-center px-[5%] mb-4">
                   <h2 className="text-lg font-medium text-gray-900 dark:text-white">Shop lists</h2>

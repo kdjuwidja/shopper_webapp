@@ -15,12 +15,7 @@ export interface ShopList {
 export function useMemberHome() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [shopLists, setShopLists] = useState<ShopList[]>([]);
-  const [showPostalCodeModal, setShowPostalCodeModal] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const handleUpdate = () => {
-    setShowPostalCodeModal(true);
-  };
 
   const fetchShopLists = async () => {
     try {
@@ -68,47 +63,6 @@ export function useMemberHome() {
     } catch (error) {
       console.error('Error fetching shop lists:', error);
       setShopLists([]);
-    }
-  };
-
-  const createOrUpdateUserProfile = async (nickname: string, postalCode: string) => {
-    try {
-      if (userProfile && 
-          userProfile.postal_code === postalCode && 
-          userProfile.nickname === nickname) {
-        setShowPostalCodeModal(false);
-        return;
-      }
-
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          nickname: nickname,
-          postal_code: postalCode 
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create or update user profile');
-      }
-     
-      setUserProfile(prev => ({
-        ...prev!,
-        nickname: nickname,
-        postal_code: postalCode
-      }));
-      setShowPostalCodeModal(false);
-    } catch (error) {
-      console.error('Error creating or updating user profile:', error);
     }
   };
 
@@ -181,11 +135,6 @@ export function useMemberHome() {
         });
 
         if (!response.ok) {
-          if (response.status === 404) {
-            setShowPostalCodeModal(true);
-            setLoading(false);
-            return;
-          }
           throw new Error('Failed to fetch user profile');
         }
 
@@ -206,12 +155,9 @@ export function useMemberHome() {
   return {
     userProfile,
     shopLists,
-    showPostalCodeModal,
     loading,
-    handleUpdate,
-    createOrUpdateUserProfile,
-    setShowPostalCodeModal,
     createShopList,
-    leaveShopList
+    leaveShopList,
+    fetchShopLists
   };
 } 
