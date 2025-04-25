@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { UserProfile } from '../memberHome';
+import type { UserProfile } from '../../common/model/userprofile';
 import { InitializeUserProfile } from './initializeUserProfile';
 
 export function useTopBar(

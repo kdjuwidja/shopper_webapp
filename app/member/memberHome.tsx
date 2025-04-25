@@ -50,6 +50,10 @@ export default function MemberHome() {
     fetchShopLists();
   };
 
+  const handleShopListClick = (id: number) => {
+    window.location.href = `/member/shoplist/${id}`;
+  };
+
   return (
     <div className="min-h-screen">
       {loading ? (
@@ -99,12 +103,16 @@ export default function MemberHome() {
                       {shopLists.map((list) => (
                         <div
                           key={list.id}
-                          className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200"
+                          className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                          onClick={() => handleShopListClick(list.id)}
                         >
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">{list.name}</h3>
                             <button
-                              onClick={() => setShopListToLeave(list.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShopListToLeave(list.id);
+                              }}
                               className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 
                                        transition-colors duration-200 text-sm font-medium"
                               title="Leave shop list"

@@ -13,9 +13,19 @@ export interface ShopList {
 }
 
 export function useMemberHome() {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfileState] = useState<UserProfile | null>(null);
   const [shopLists, setShopLists] = useState<ShopList[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Wrapper function to handle both state and localStorage updates
+  const setUserProfile = (profile: UserProfile | null) => {
+    setUserProfileState(profile);
+    if (profile) {
+      localStorage.setItem('userProfile', JSON.stringify(profile));
+    } else {
+      localStorage.removeItem('userProfile');
+    }
+  };
 
   const fetchShopLists = async () => {
     try {
@@ -158,6 +168,7 @@ export function useMemberHome() {
     loading,
     createShopList,
     leaveShopList,
-    fetchShopLists
+    fetchShopLists,
+    setUserProfile
   };
 } 

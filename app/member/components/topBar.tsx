@@ -1,4 +1,4 @@
-import type { UserProfile } from '../memberHome';
+import type { UserProfile } from '../../common/model/userprofile';
 import { InitializeUserProfile } from './initializeUserProfile';
 import { useTopBar } from './topBarLogic';
 
