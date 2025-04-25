@@ -19,11 +19,15 @@ export default function MemberHome() {
     loading,
     createShopList,
     leaveShopList,
-    fetchShopLists
+    fetchShopLists,
+    joinShopList
   } = useMemberHome();
 
   const [showCreateShopList, setShowCreateShopList] = useState(false);
   const [shopListToLeave, setShopListToLeave] = useState<number | null>(null);
+  const [showJoinDialog, setShowJoinDialog] = useState(false);
+  const [shareCode, setShareCode] = useState('');
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   const handleCreateShopList = async (data: { name: string }) => {
     try {
@@ -42,6 +46,24 @@ export default function MemberHome() {
     } catch (error) {
       console.error('Failed to leave shop list:', error);
       // You might want to show an error message to the user here
+    }
+  };
+
+  const handleJoinShopList = async () => {
+    if (!shareCode.trim()) {
+      setJoinError('Please enter a share code');
+      return;
+    }
+    
+    try {
+      setJoinError(null);
+      await joinShopList(shareCode);
+      await fetchShopLists();
+      setShowJoinDialog(false);
+      setShareCode('');
+    } catch (error) {
+      console.error('Failed to join shop list:', error);
+      setJoinError('Invalid share code or unable to join the shop list');
     }
   };
 
@@ -72,10 +94,39 @@ export default function MemberHome() {
             isOpen={shopListToLeave !== null}
             title="Leave Shop List"
             message="Are you sure you want to leave this shop list? You can always rejoin later."
-            confirmLabel="Leave"
-            cancelLabel="Cancel"
+            confirmText="Leave"
+            cancelText="Cancel"
             onConfirm={() => shopListToLeave !== null && handleLeaveShopList(shopListToLeave)}
-            onCancel={() => setShopListToLeave(null)}
+            onClose={() => setShopListToLeave(null)}
+          />
+          <ConfirmDialog
+            isOpen={showJoinDialog}
+            title="Join Shop List"
+            message={
+              <div className="space-y-4">
+                <p>Enter the share code to join a shop list:</p>
+                <div>
+                  <input
+                    type="text"
+                    value={shareCode}
+                    onChange={(e) => setShareCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter share code"
+                  />
+                  {joinError && (
+                    <p className="mt-2 text-sm text-red-600">{joinError}</p>
+                  )}
+                </div>
+              </div>
+            }
+            confirmText="Join"
+            cancelText="Cancel"
+            onConfirm={handleJoinShopList}
+            onClose={() => {
+              setShowJoinDialog(false);
+              setShareCode('');
+              setJoinError(null);
+            }}
           />
           {userProfile && (
             <>
@@ -86,14 +137,24 @@ export default function MemberHome() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex justify-between items-center px-[5%] mb-4">
                   <h2 className="text-lg font-medium text-gray-900 dark:text-white">Shop lists</h2>
-                  <button
-                    onClick={() => setShowCreateShopList(true)}
-                    className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 
-                             text-white font-medium rounded-md 
-                             transition-colors duration-200"
-                  >
-                    Add
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setShowJoinDialog(true)}
+                      className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 
+                               text-white font-medium rounded-md 
+                               transition-colors duration-200"
+                    >
+                      Join
+                    </button>
+                    <button
+                      onClick={() => setShowCreateShopList(true)}
+                      className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 
+                               text-white font-medium rounded-md 
+                               transition-colors duration-200"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
                 <div className="px-[5%]">
                   {shopLists.length === 0 ? (

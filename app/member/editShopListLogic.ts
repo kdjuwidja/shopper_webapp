@@ -168,6 +168,39 @@ export function useEditShopList(shopListId: number | null) {
     }
   };
 
+  // Function to request a share code for the shop list
+  const requestShareCode = async () => {
+    if (!shopListId) {
+      throw new Error('No shop list ID provided');
+    }
+    
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/share-code`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate share code');
+      }
+
+      const data = await response.json();
+      console.log('Share code generated:', data);
+      return { share_code: data.share_code };
+    } catch (error) {
+      console.error('Error generating share code:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      throw error;
+    }
+  };
+
   return {
     userProfile,
     shopList,
@@ -175,6 +208,7 @@ export function useEditShopList(shopListId: number | null) {
     error,
     handleProfileUpdate,
     refreshShopList,
-    leaveShopList
+    leaveShopList,
+    requestShareCode
   };
 } 

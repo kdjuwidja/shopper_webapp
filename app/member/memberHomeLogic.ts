@@ -130,6 +130,34 @@ export function useMemberHome() {
     }
   };
 
+  const joinShopList = async (shareCode: string) => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/join`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ share_code: shareCode })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to join shop list');
+      }
+
+      // Refresh the shop lists after joining
+      await fetchShopLists();
+    } catch (error) {
+      console.error('Error joining shop list:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -169,6 +197,7 @@ export function useMemberHome() {
     createShopList,
     leaveShopList,
     fetchShopLists,
-    setUserProfile
+    setUserProfile,
+    joinShopList
   };
 } 
