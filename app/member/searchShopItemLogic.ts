@@ -92,7 +92,7 @@ export function useSearchShopItem(shopListId: string | undefined) {
   };
 
   // Function to make the PUT request to add item
-  const addItemToShopList = async (requestBody: { item_name: string; brand_name?: string; extra_info?: string }) => {
+  const addItemToShopList = async (requestBody: { item_name: string; brand_name?: string; extra_info?: string; thumbnail?: string }) => {
     if (!shopListId) return false;
     
     try {
@@ -156,7 +156,8 @@ export function useSearchShopItem(shopListId: string | undefined) {
     return await addItemToShopList({
       item_name: flyerItem.product_name,
       brand_name: flyerItem.brand,
-      extra_info: flyerItem.description
+      extra_info: flyerItem.description,
+      thumbnail: flyerItem.image_url,
     });
   };
 

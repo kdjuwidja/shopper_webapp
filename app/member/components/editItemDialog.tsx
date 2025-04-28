@@ -78,7 +78,7 @@ export const EditItemDialog: React.FC<EditItemDialogProps> = ({ isOpen, onClose,
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className="flex justify-end space-x-2">
             <button
               type="button"
               onClick={onClose}

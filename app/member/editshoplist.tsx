@@ -6,6 +6,53 @@ import { useEffect, useState } from 'react';
 import { ConfirmDialog } from './components/confirmDialog';
 import { EditItemDialog } from './components/editItemDialog';
 
+// Add ThumbnailPopup component
+const ThumbnailPopup = ({ isOpen, onClose, imageUrl, altText }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  imageUrl: string; 
+  altText: string;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+        </div>
+
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="sm:flex sm:items-start">
+              <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                <div className="mt-2">
+                  <img
+                    src={imageUrl}
+                    alt={altText}
+                    className="w-full h-auto object-contain rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button
+              type="button"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function EditShopList() {
   // Get the shop list ID from the URL parameters
   const { id } = useParams<{ id: string }>();
@@ -37,7 +84,9 @@ export default function EditShopList() {
     item_name: string;
     brand_name: string;
     extra_info: string;
+    thumbnail: string;
   } | null>(null);
+  const [selectedThumbnail, setSelectedThumbnail] = useState<{ url: string; alt: string } | null>(null);
 
   // Debug log to check if userProfile is available
   useEffect(() => {
@@ -87,7 +136,8 @@ export default function EditShopList() {
           id: item.id,
           item_name: item.item_name,
           brand_name: item.brand_name || '',
-          extra_info: item.extra_info || ''
+          extra_info: item.extra_info || '',
+          thumbnail: item.thumbnail || ''
         });
         setShowEditDialog(true);
       }
@@ -97,7 +147,11 @@ export default function EditShopList() {
   // Handle saving edited item
   const handleSaveEditedItem = (updatedData: { item_name: string; brand_name: string; extra_info: string }) => {
     if (itemToEdit) {
-      editItem(itemToEdit.id, updatedData);
+      // Preserve the existing thumbnail when updating other fields
+      editItem(itemToEdit.id, {
+        ...updatedData,
+        thumbnail: itemToEdit.thumbnail
+      });
       setShowEditDialog(false);
       setItemToEdit(null);
     }
@@ -237,14 +291,24 @@ export default function EditShopList() {
                     {shopList.items.map((item) => (
                       <li key={item.id} className="py-2">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">{item.item_name}</span>
-                            {item.brand_name && (
-                              <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({item.brand_name})</span>
+                          <div className="flex items-center">
+                            {item.thumbnail && (
+                              <img 
+                                src={item.thumbnail} 
+                                alt={`${item.item_name} thumbnail`} 
+                                className="w-[50px] h-[50px] object-cover rounded mr-3 cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => setSelectedThumbnail({ url: item.thumbnail, alt: item.item_name })}
+                              />
                             )}
-                            {item.extra_info && (
-                              <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">- {item.extra_info}</span>
-                            )}
+                            <div>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">{item.item_name}</span>
+                              {item.brand_name && (
+                                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({item.brand_name})</span>
+                              )}
+                              {item.extra_info && (
+                                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">- {item.extra_info}</span>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-center space-x-2">
                             <div className="flex items-center">
@@ -339,6 +403,14 @@ export default function EditShopList() {
         }}
         onSave={handleSaveEditedItem}
         item={itemToEdit}
+      />
+
+      {/* Add ThumbnailPopup component */}
+      <ThumbnailPopup
+        isOpen={!!selectedThumbnail}
+        onClose={() => setSelectedThumbnail(null)}
+        imageUrl={selectedThumbnail?.url || ''}
+        altText={selectedThumbnail?.alt || ''}
       />
     </div>
   );

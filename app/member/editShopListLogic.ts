@@ -17,6 +17,7 @@ interface ShopListItem {
   brand_name: string;
   extra_info: string;
   is_bought: boolean;
+  thumbnail: string;
 }
 
 export interface ShopList {
@@ -202,7 +203,7 @@ export function useEditShopList(shopListId: number | null) {
   };
 
   // Function to edit an item in the shop list
-  const editItem = async (itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean }) => {
+  const editItem = async (itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean; thumbnail?: string }) => {
     if (!shopListId) return false;
     
     try {
