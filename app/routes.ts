@@ -24,5 +24,9 @@ export default [
   {
     path: "/member/shoplist/:id",
     file: "member/editshoplist.tsx"
+  },
+  {
+    path: "/member/searchshopitem/:id",
+    file: "member/searchShopItem.tsx"
   }
 ] satisfies RouteConfig;

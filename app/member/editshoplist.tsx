@@ -1,13 +1,15 @@
 import { TopBar } from './components/topBar';
 import { useEditShopList } from './editShopListLogic';
 import type { UserProfile } from '../common/model/userprofile';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from './components/confirmDialog';
+import { EditItemDialog } from './components/editItemDialog';
 
 export default function EditShopList() {
   // Get the shop list ID from the URL parameters
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   
   const { 
     userProfile, 
@@ -17,7 +19,9 @@ export default function EditShopList() {
     handleProfileUpdate,
     refreshShopList,
     leaveShopList,
-    requestShareCode
+    requestShareCode,
+    editItem,
+    removeItem
   } = useEditShopList(id ? parseInt(id) : null);
 
   // State for confirm dialog
@@ -25,6 +29,15 @@ export default function EditShopList() {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState<number | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState<{
+    id: number;
+    item_name: string;
+    brand_name: string;
+    extra_info: string;
+  } | null>(null);
 
   // Debug log to check if userProfile is available
   useEffect(() => {
@@ -41,7 +54,7 @@ export default function EditShopList() {
   const handleLeaveShopList = async () => {
     const success = await leaveShopList();
     if (success) {
-      window.location.href = '/member/home';
+      window.location.href = '/member';
     }
   };
 
@@ -53,6 +66,57 @@ export default function EditShopList() {
       setShowShareDialog(true);
     } catch (error) {
       console.error('Error generating share code:', error);
+    }
+  };
+
+  // Handle navigation to search page
+  const handleAddItem = () => {
+    navigate(`/member/searchshopitem/${id}`);
+  };
+
+  // Handle editing an item
+  const handleEditItem = (itemId: number, updatedData?: { is_bought?: boolean }) => {
+    if (updatedData) {
+      // If updatedData is provided, update the item directly
+      editItem(itemId, updatedData);
+    } else {
+      // Find the item to edit
+      const item = shopList?.items.find(item => item.id === itemId);
+      if (item) {
+        setItemToEdit({
+          id: item.id,
+          item_name: item.item_name,
+          brand_name: item.brand_name || '',
+          extra_info: item.extra_info || ''
+        });
+        setShowEditDialog(true);
+      }
+    }
+  };
+
+  // Handle saving edited item
+  const handleSaveEditedItem = (updatedData: { item_name: string; brand_name: string; extra_info: string }) => {
+    if (itemToEdit) {
+      editItem(itemToEdit.id, updatedData);
+      setShowEditDialog(false);
+      setItemToEdit(null);
+    }
+  };
+
+  // Handle removing an item
+  const handleRemoveItem = (itemId: number) => {
+    setItemToRemove(itemId);
+    setShowRemoveConfirm(true);
+  };
+
+  // Handle confirming item removal
+  const handleConfirmRemoveItem = async () => {
+    if (itemToRemove) {
+      const success = await removeItem(itemToRemove);
+      if (success) {
+        setShowRemoveConfirm(false);
+        setItemToRemove(null);
+      }
     }
   };
 
@@ -103,7 +167,7 @@ export default function EditShopList() {
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <button
-                  onClick={() => window.history.back()}
+                  onClick={() => navigate('/member')}
                   className="mr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                   aria-label="Go back"
                 >
@@ -156,7 +220,17 @@ export default function EditShopList() {
           
           <div className="px-6 py-5">
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Items</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Items</h2>
+                <button
+                  onClick={handleAddItem}
+                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 
+                           text-white font-medium rounded-md 
+                           transition-colors duration-200"
+                >
+                  Add
+                </button>
+              </div>
               <div className="space-y-2">
                 {shopList.items && shopList.items.length > 0 ? (
                   <ul className="divide-y divide-gray-200 dark:divide-gray-600">
@@ -168,14 +242,44 @@ export default function EditShopList() {
                             {item.brand_name && (
                               <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({item.brand_name})</span>
                             )}
-                          </div>
-                          <div className="flex items-center">
                             {item.extra_info && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mr-2">{item.extra_info}</span>
+                              <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">- {item.extra_info}</span>
                             )}
-                            <span className={`px-2 py-1 text-xs rounded-full ${item.is_bought ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}`}>
-                              {item.is_bought ? 'Bought' : 'Pending'}
-                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={item.is_bought}
+                                onChange={(e) => handleEditItem(item.id, { is_bought: e.target.checked })}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                aria-label={`Mark ${item.item_name} as ${item.is_bought ? 'pending' : 'bought'}`}
+                              />
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleEditItem(item.id);
+                              }}
+                              className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                              aria-label="Edit item"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleRemoveItem(item.id);
+                              }}
+                              className="p-1 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                              aria-label="Remove item"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
                         </div>
                       </li>
@@ -215,6 +319,26 @@ export default function EditShopList() {
         }
         confirmText="Close"
         cancelText=""
+      />
+
+      <ConfirmDialog
+        isOpen={showRemoveConfirm}
+        onClose={() => setShowRemoveConfirm(false)}
+        onConfirm={handleConfirmRemoveItem}
+        title="Remove Item"
+        message="Are you sure you want to remove this item from the shop list?"
+        confirmText="Remove"
+        cancelText="Cancel"
+      />
+
+      <EditItemDialog
+        isOpen={showEditDialog}
+        onClose={() => {
+          setShowEditDialog(false);
+          setItemToEdit(null);
+        }}
+        onSave={handleSaveEditedItem}
+        item={itemToEdit}
       />
     </div>
   );

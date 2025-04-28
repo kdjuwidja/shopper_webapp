@@ -201,6 +201,70 @@ export function useEditShopList(shopListId: number | null) {
     }
   };
 
+  // Function to edit an item in the shop list
+  const editItem = async (itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean }) => {
+    if (!shopListId) return false;
+    
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/item/${itemId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update item');
+      }
+
+      // Refresh the shop list to get the updated data
+      await refreshShopList();
+      return true;
+    } catch (error) {
+      console.error('Error updating item:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      return false;
+    }
+  };
+
+  // Function to remove an item from the shop list
+  const removeItem = async (itemId: number) => {
+    if (!shopListId) return false;
+    
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/item/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove item');
+      }
+
+      // Refresh the shop list to get the updated data
+      await refreshShopList();
+      return true;
+    } catch (error) {
+      console.error('Error removing item:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      return false;
+    }
+  };
+
   return {
     userProfile,
     shopList,
@@ -209,6 +273,8 @@ export function useEditShopList(shopListId: number | null) {
     handleProfileUpdate,
     refreshShopList,
     leaveShopList,
-    requestShareCode
+    requestShareCode,
+    editItem,
+    removeItem
   };
 } 
