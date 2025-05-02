@@ -103,7 +103,8 @@ export default function EditShopList() {
   const handleLeaveShopList = async () => {
     const success = await leaveShopList();
     if (success) {
-      window.location.href = '/member';
+      const basename = import.meta.env.VITE_BASE_PATH || '';
+      window.location.href = `${basename}/member`;
     }
   };
 

@@ -73,7 +73,8 @@ export default function MemberHome() {
   };
 
   const handleShopListClick = (id: number) => {
-    window.location.href = `/member/shoplist/${id}`;
+    const basename = import.meta.env.VITE_BASE_PATH || '';
+    window.location.href = `${basename}/member/shoplist/${id}`;
   };
 
   return (

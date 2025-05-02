@@ -37,6 +37,7 @@ export function useCallback() {
     // Exchange authorization code for tokens
     const exchangeCodeForTokens = async () => {
       try {
+        const basename = import.meta.env.VITE_BASE_PATH || '';
         const response = await fetch(import.meta.env.VITE_TOKEN_URL, {
           method: 'POST',
           headers: {
@@ -45,7 +46,7 @@ export function useCallback() {
           body: new URLSearchParams({
             code,
             state,
-            redirect_uri: window.location.origin + '/callback',
+            redirect_uri: window.location.origin + basename + '/callback',
             grant_type: 'authorization_code',
             client_id: import.meta.env.VITE_CLIENT_ID,
             client_secret: import.meta.env.VITE_CLIENT_SECRET
