@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_CONFIG, getApiUrl } from '../apiConfig';
 
 // Interface for the flyer item
 export interface FlyerItem {
@@ -63,7 +64,7 @@ export function useSearchShopItem(shopListId: string | undefined) {
       }
       
       // Make API call to search for flyers with authorization header
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/search/flyers?searchName=${encodeURIComponent(term)}`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SEARCH_FLYERS) + `?searchName=${encodeURIComponent(term)}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
@@ -107,7 +108,7 @@ export function useSearchShopItem(shopListId: string | undefined) {
       }
       
       // Submit PUT request to add item to the shop list
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/item`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_ITEMS(shopListId)), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
+import { API_CONFIG, getCallbackUrl, getAuthUrl } from '../apiConfig';
 
 export function useCallback() {
   const navigate = useNavigate();
@@ -37,20 +38,19 @@ export function useCallback() {
     // Exchange authorization code for tokens
     const exchangeCodeForTokens = async () => {
       try {
-        const basename = import.meta.env.VITE_BASE_PATH || '';
-        const response = await fetch(import.meta.env.VITE_TOKEN_URL, {
+        const response = await fetch(getAuthUrl(API_CONFIG.ENDPOINTS.TOKEN), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: new URLSearchParams({
-            code,
-            state,
-            redirect_uri: window.location.origin + basename + '/callback',
             grant_type: 'authorization_code',
-            client_id: import.meta.env.VITE_CLIENT_ID,
-            client_secret: import.meta.env.VITE_CLIENT_SECRET
-          }).toString()
+            code: code,
+            redirect_uri: getCallbackUrl(),
+            client_id: API_CONFIG.CLIENT_ID,
+            client_secret: API_CONFIG.CLIENT_SECRET,
+            state: state,
+          }),
         });
 
         if (!response.ok) {
@@ -91,7 +91,7 @@ export function useCallback() {
     };
 
     exchangeCodeForTokens();
-  }, []); // Empty dependency array - run once on mount
+  }, []);
 
   useEffect(() => {
     if (error) {

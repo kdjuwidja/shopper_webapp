@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { UserProfile } from '../common/model/userprofile';
+import { API_CONFIG, getApiUrl } from '../apiConfig';
 
 interface ShopListMember {
   id: string;
@@ -82,7 +83,7 @@ export function useEditShopList(shopListId: number | null) {
       }
 
       // Fetch shop list details
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${id}`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_BY_ID(id)), {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -150,7 +151,7 @@ export function useEditShopList(shopListId: number | null) {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/leave`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_LEAVE(shopListId)), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -181,7 +182,7 @@ export function useEditShopList(shopListId: number | null) {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/share-code`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_SHARE_CODE(shopListId)), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -212,7 +213,7 @@ export function useEditShopList(shopListId: number | null) {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/item/${itemId}`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_ITEM(shopListId, itemId)), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -245,7 +246,7 @@ export function useEditShopList(shopListId: number | null) {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${shopListId}/item/${itemId}`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_ITEM(shopListId, itemId)), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${accessToken}`

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { UserProfile } from '../common/model/userprofile';
+import { API_CONFIG, getApiUrl } from '../apiConfig';
 
 interface ShopListOwner {
   id: string;
@@ -34,7 +35,7 @@ export function useMemberHome() {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_BASE), {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -83,7 +84,7 @@ export function useMemberHome() {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_BASE), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -111,7 +112,7 @@ export function useMemberHome() {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/${id}/leave`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_LEAVE(id)), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -137,7 +138,7 @@ export function useMemberHome() {
         throw new Error('No access token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/shoplist/join`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_JOIN), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -166,7 +167,7 @@ export function useMemberHome() {
           throw new Error('No access token found');
         }
 
-        const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
+        const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.USER_PROFILE), {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
@@ -200,4 +201,4 @@ export function useMemberHome() {
     setUserProfile,
     joinShopList
   };
-} 
+}

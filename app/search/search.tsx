@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { AdvancedMarker, APIProvider, Map, Pin } from '@vis.gl/react-google-maps';
 import type { MapCameraChangedEvent } from '@vis.gl/react-google-maps';
 import { Circle } from "./components/circle";
+import { API_CONFIG, getApiUrl } from '../apiConfig';
 
 
 export function Search() {
   const [query, setQuery] = useState("");
-  const [distance, setDistance] = useState(10);
+  const [distance, setDistance] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
   const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
@@ -24,13 +25,13 @@ export function Search() {
   useEffect(() => {
     setShowAddressDialog(true);
     // Get the last used address from localStorage, or use defaultAddress if none exists
-    const lastUsedAddress = localStorage.getItem('lastUsedAddress') || defaultAddress;
+    const lastUsedAddress = localStorage.getItem('lastUsedAddress') || API_CONFIG.DEFAULT_ADDRESS || '';
     setAddressInput(lastUsedAddress);
   }, []);
 
   const handleAddressSubmit = () => {
     if (addressInput.trim()) {
-      const url = `${coreApiUrl}/getLatLngByAddress?address=${addressInput.trim().replace(/\s+/g, '+')}`;
+      const url = getApiUrl('/getLatLngByAddress') + `?address=${addressInput.trim().replace(/\s+/g, '+')}`;
       console.log(url);
       fetch(url)
         .then(response => response.json())
