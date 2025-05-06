@@ -3,6 +3,7 @@ import { ConfirmDialog } from './components/confirmDialog';
 import { TopBar } from './components/topBar';
 import { useMemberHome } from './memberHomeLogic';
 import { useState } from 'react';
+import { InitializeUserProfile } from './components/initializeUserProfile';
 
 export interface UserProfile {
   id: string;
@@ -20,7 +21,8 @@ export default function MemberHome() {
     createShopList,
     leaveShopList,
     fetchShopLists,
-    joinShopList
+    joinShopList,
+    setUserProfile
   } = useMemberHome();
 
   const [showCreateShopList, setShowCreateShopList] = useState(false);
@@ -77,6 +79,37 @@ export default function MemberHome() {
     window.location.href = `${basename}/member/shoplist/${id}`;
   };
 
+  const handleProfileCreate = async (nickname: string, postalCode: string) => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          nickname: nickname,
+          postal_code: postalCode 
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user profile');
+      }
+
+      const data = await response.json();
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Failed to create user profile:', error);
+      // You might want to show an error message to the user here
+    }
+  };
+
   return (
     <div className="min-h-screen">
       {loading ? (
@@ -129,7 +162,12 @@ export default function MemberHome() {
               setJoinError(null);
             }}
           />
-          {userProfile && (
+          {!userProfile ? (
+            <InitializeUserProfile
+              onSubmit={handleProfileCreate}
+              onCancel={() => {}}
+            />
+          ) : (
             <>
               <TopBar 
                 initialUserProfile={userProfile} 
