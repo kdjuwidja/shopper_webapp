@@ -60,8 +60,10 @@ export function useMemberHome() {
 
   const updateUserProfileState = async (nickname: string, postalCode: string) => {
     try {
-      const data = await createOrUpdateUserProfile(nickname, postalCode);
-      setUserProfile(data);
+      await createOrUpdateUserProfile(nickname, postalCode);
+      // Fetch the updated profile to get all fields
+      const updatedProfile = await fetchUserProfile();
+      setUserProfile(updatedProfile);
     } catch (error) {
       console.error('Failed to update user profile:', error);
       throw error;
