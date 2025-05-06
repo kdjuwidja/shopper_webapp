@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { UserProfile } from '../../common/model/userprofile';
 import { InitializeUserProfile } from './initializeUserProfile';
+import { createOrUpdateUserProfile} from '../../api/coreApiHandler';
 
 export function useTopBar(
   initialUserProfile: UserProfile | null,
@@ -13,35 +14,9 @@ export function useTopBar(
     setShowPostalCodeModal(true);
   };
 
-  const createOrUpdateUserProfile = async (nickname: string, postalCode: string) => {
+  const handleSubmit = async (nickname: string, postalCode: string) => {
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          nickname: nickname,
-          postal_code: postalCode 
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create or update user profile');
-      }
-
-      const updatedProfile = {
-        ...userProfile,
-        nickname: nickname,
-        postal_code: postalCode,
-      } as UserProfile;
-      
+      const updatedProfile = await createOrUpdateUserProfile(nickname, postalCode);
       setUserProfile(updatedProfile);
       setShowPostalCodeModal(false);
       
@@ -59,7 +34,7 @@ export function useTopBar(
     userProfile,
     showPostalCodeModal,
     handleUpdate,
-    createOrUpdateUserProfile,
+    handleSubmit,
     setShowPostalCodeModal,
   };
 } 

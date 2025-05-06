@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { API_CONFIG, getCallbackUrl, getAuthUrl } from '../apiConfig';
+import { API_CONFIG, getCallbackUrl, getAuthUrl } from '../api/apiConfig';
 
 export function useLogin() {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ export function useLogin() {
         return;
       } else {
         // TODO: Implement token verification and redirection logic
-        navigate(`${API_CONFIG.BASE_PATH ? `/${API_CONFIG.BASE_PATH}` : ''}/member`);
+        navigate(`/member`);
         return;
       }
     };

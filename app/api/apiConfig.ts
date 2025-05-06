@@ -42,7 +42,7 @@ export const API_CONFIG = {
 } as const;
 
 // Helper function to get the full URL for a given path
-export function getFullUrl(path: string): string {
+export function getCoreUrl(path: string): string {
   return `${API_CONFIG.CORE_API_URL}${path}`;
 }
 
@@ -55,8 +55,3 @@ export function getAuthUrl(path: string): string {
 export function getCallbackUrl(): string {
   return `${API_CONFIG.FRONTEND_URL}${API_CONFIG.BASE_PATH}/callback`;
 }
-
-// Helper function to get the full API URL for a given endpoint
-export function getApiUrl(endpoint: string): string {
-  return getFullUrl(endpoint);
-} 

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useState } from 'react';
 import type { UserProfile } from '../common/model/userprofile';
 import { useSearchShopItem } from './searchShopItemLogic';
-import type { FlyerItem } from './searchShopItemLogic';
+import type { FlyerItem } from '../api/coreApiHandler';
 
 export default function SearchShopItem() {
   // Get the shop list ID from the URL parameters

@@ -1,33 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { UserProfile } from '../common/model/userprofile';
-import { API_CONFIG, getApiUrl } from '../apiConfig';
-
-interface ShopListMember {
-  id: string;
-  nickname: string;
-}
-
-interface ShopListOwner {
-  id: string;
-  nickname: string;
-}
-
-interface ShopListItem {
-  id: number;
-  item_name: string;
-  brand_name: string;
-  extra_info: string;
-  is_bought: boolean;
-  thumbnail: string;
-}
-
-export interface ShopList {
-  id: number;
-  name: string;
-  owner: ShopListOwner;
-  members: ShopListMember[];
-  items: ShopListItem[];
-}
+import type { ShopList } from '../api/coreApiHandler';
+import { fetchShopList, leaveShopList, requestShopListShareCode, editShopListItem, removeShopListItem } from '../api/coreApiHandler';
 
 export function useEditShopList(shopListId: number | null) {
   const [userProfile, setUserProfileState] = useState<UserProfile | null>(null);
@@ -75,33 +49,11 @@ export function useEditShopList(shopListId: number | null) {
   }, [userProfile]);
 
   // Function to fetch shop list data
-  const fetchShopList = async (id: number) => {
+  const fetchShopListData = async (id: number) => {
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      // Fetch shop list details
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_BY_ID(id)), {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Shop list not found');
-        } else {
-          throw new Error('Failed to fetch shop list details');
-        }
-        return null;
-      }
-
-      // Directly assign the JSON response to our ShopList interface
-      const data = await response.json();
-      setShopList(data as ShopList);
-      return data as ShopList;
+      const data = await fetchShopList(id);
+      setShopList(data);
+      return data;
     } catch (error) {
       console.error('Error fetching shop list:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -119,7 +71,7 @@ export function useEditShopList(shopListId: number | null) {
       }
 
       setLoading(true);
-      await fetchShopList(shopListId);
+      await fetchShopListData(shopListId);
       setLoading(false);
     };
 
@@ -136,32 +88,17 @@ export function useEditShopList(shopListId: number | null) {
   const refreshShopList = async () => {
     if (shopListId) {
       setLoading(true);
-      await fetchShopList(shopListId);
+      await fetchShopListData(shopListId);
       setLoading(false);
     }
   };
 
   // Function to leave a shop list
-  const leaveShopList = async () => {
+  const leaveShopListState = async () => {
     if (!shopListId) return false;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_LEAVE(shopListId)), {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to leave shop list');
-      }
-
+      await leaveShopList(shopListId);
       return true;
     } catch (error) {
       console.error('Error leaving shop list:', error);
@@ -171,31 +108,15 @@ export function useEditShopList(shopListId: number | null) {
   };
 
   // Function to request a share code for the shop list
-  const requestShareCode = async () => {
+  const requestShareCodeState = async () => {
     if (!shopListId) {
       throw new Error('No shop list ID provided');
     }
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_SHARE_CODE(shopListId)), {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate share code');
-      }
-
-      const data = await response.json();
+      const data = await requestShopListShareCode(shopListId);
       console.log('Share code generated:', data);
-      return { share_code: data.share_code };
+      return data;
     } catch (error) {
       console.error('Error generating share code:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -204,29 +125,11 @@ export function useEditShopList(shopListId: number | null) {
   };
 
   // Function to edit an item in the shop list
-  const editItem = async (itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean; thumbnail?: string }) => {
+  const editItemState = async (itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean; thumbnail?: string }) => {
     if (!shopListId) return false;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_ITEM(shopListId, itemId)), {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update item');
-      }
-
-      // Refresh the shop list to get the updated data
+      await editShopListItem(shopListId, itemId, updatedData);
       await refreshShopList();
       return true;
     } catch (error) {
@@ -237,27 +140,11 @@ export function useEditShopList(shopListId: number | null) {
   };
 
   // Function to remove an item from the shop list
-  const removeItem = async (itemId: number) => {
+  const removeItemState = async (itemId: number) => {
     if (!shopListId) return false;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SHOPLIST_ITEM(shopListId, itemId)), {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to remove item');
-      }
-
-      // Refresh the shop list to get the updated data
+      await removeShopListItem(shopListId, itemId);
       await refreshShopList();
       return true;
     } catch (error) {
@@ -274,9 +161,9 @@ export function useEditShopList(shopListId: number | null) {
     error,
     handleProfileUpdate,
     refreshShopList,
-    leaveShopList,
-    requestShareCode,
-    editItem,
-    removeItem
+    leaveShopList: leaveShopListState,
+    requestShareCode: requestShareCodeState,
+    editItem: editItemState,
+    removeItem: removeItemState
   };
 } 

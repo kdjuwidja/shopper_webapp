@@ -12,7 +12,7 @@ export function TopBar({ initialUserProfile, onProfileUpdate }: TopBarProps) {
     userProfile,
     showPostalCodeModal,
     handleUpdate,
-    createOrUpdateUserProfile,
+    handleSubmit,
     setShowPostalCodeModal,
   } = useTopBar(initialUserProfile, onProfileUpdate);
 
@@ -22,7 +22,7 @@ export function TopBar({ initialUserProfile, onProfileUpdate }: TopBarProps) {
     <>
       {showPostalCodeModal && (
         <InitializeUserProfile
-          onSubmit={createOrUpdateUserProfile}
+          onSubmit={handleSubmit}
           onCancel={() => setShowPostalCodeModal(false)}
           userProfile={userProfile}
         />

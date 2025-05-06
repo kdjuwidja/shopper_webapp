@@ -22,7 +22,8 @@ export default function MemberHome() {
     leaveShopList,
     fetchShopLists,
     joinShopList,
-    setUserProfile
+    setUserProfile,
+    updateUserProfile
   } = useMemberHome();
 
   const [showCreateShopList, setShowCreateShopList] = useState(false);
@@ -81,31 +82,9 @@ export default function MemberHome() {
 
   const handleProfileCreate = async (nickname: string, postalCode: string) => {
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_CORE_API_URL}/v1/user`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          nickname: nickname,
-          postal_code: postalCode 
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create user profile');
-      }
-
-      const data = await response.json();
-      setUserProfile(data);
+      await updateUserProfile(nickname, postalCode);
     } catch (error) {
-      console.error('Failed to create user profile:', error);
+      console.error('Failed to update user profile:', error);
       // You might want to show an error message to the user here
     }
   };

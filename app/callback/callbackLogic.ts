@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { API_CONFIG, getCallbackUrl, getAuthUrl } from '../apiConfig';
+import { API_CONFIG, getCallbackUrl, getAuthUrl } from '../api/apiConfig';
 
 export function useCallback() {
   const navigate = useNavigate();
