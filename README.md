@@ -18,3 +18,26 @@ To run the application, you need to create a `.env` file in the root directory w
 ### Oauth2 configuration
 - `VITE_CLIENT_ID`: The Oauth2 api client ID used for authentication and authorization.
 - `VITE_CLIENT_SECRET`: the Oauth2 api client secret used for authentication and authorization.
+
+## Development
+
+### Prerequisites
+- Docker and Docker Compose
+- Node.js (v16 or higher) - only needed for local development without Docker
+- npm or yarn - only needed for local development without Docker
+
+### Using Docker
+The application is part of a larger architecture. To run the entire stack including the frontend:
+
+```bash
+docker compose build
+docker compose up
+```
+
+The frontend will be available at:
+- Development: http://localhost:5173
+- Production: http://localhost:3000
+
+## Deployment
+The application is designed to be deployed using Docker Compose. Sample docker compose of the stack is available in 
+[ai_shopper_docker_compose](https://github.com/kdjuwidja/ai_shopper_docker_compose)
