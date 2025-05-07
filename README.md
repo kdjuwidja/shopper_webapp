@@ -40,4 +40,4 @@ The frontend will be available at:
 
 ## Deployment
 The application is designed to be deployed using Docker Compose. Sample docker compose of the stack is available in 
-[ai_shopper_docker_compose](https://github.com/kdjuwidja/ai_shopper_docker_compose)
+[shopper_docker_compose](https://github.com/kdjuwidja/shopper_docker_compose)
