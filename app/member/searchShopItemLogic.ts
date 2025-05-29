@@ -79,8 +79,7 @@ export function useSearchShopItem(shopListId: string | undefined) {
       await addItemToShopList(shopListId!, {
         item_name: flyerItem.product_name,
         brand_name: flyerItem.brand,
-        extra_info: flyerItem.description,
-        thumbnail: flyerItem.image_url,
+        extra_info: flyerItem.description
       });
       return true;
     } catch (err) {

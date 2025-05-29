@@ -17,7 +17,6 @@ export interface ShopListItem {
   brand_name: string;
   extra_info: string;
   is_bought: boolean;
-  thumbnail: string;
 }
 
 export interface ShopList {
@@ -90,6 +89,7 @@ export async function fetchUserProfile(): Promise<UserProfile> {
 }
 
 export async function fetchShopLists(): Promise<ShopList[]> {
+  // Check if we already have cached data
   const accessToken = localStorage.getItem('access_token');
   if (!accessToken) {
     throw new Error('No access token found');
@@ -106,16 +106,49 @@ export async function fetchShopLists(): Promise<ShopList[]> {
   }
 
   const data = await response.json();
-  return Array.isArray(data.shoplists) 
+  const shoplists = Array.isArray(data.shoplists) 
     ? data.shoplists.map((item: any) => ({
         id: Number(item.id),
         name: String(item.name),
         owner: {
           id: String(item.owner.id),
           nickname: String(item.owner.nickname)
-        }
+        },
+        members: Array.isArray(item.members) 
+          ? item.members.map((member: any) => ({
+              id: String(member.id),
+              nickname: String(member.nickname)
+            }))
+          : [],
+        items: Array.isArray(item.items) 
+          ? item.items.map((shopItem: any) => ({
+              id: Number(shopItem.id),
+              item_name: String(shopItem.name),
+              brand_name: String(shopItem.brand_name || ''),
+              extra_info: String(shopItem.extra_info || ''),
+              is_bought: Boolean(shopItem.is_bought)
+            }))
+          : []
       }))
     : [];
+
+  return shoplists;
+}
+
+export function getCachedShopLists(): ShopList[] | null {
+  const cached = sessionStorage.getItem('shoplists');
+  if (!cached) return null;
+
+  try {
+    return JSON.parse(cached);
+  } catch (e) {
+    sessionStorage.removeItem('shoplists');
+    return null;
+  }
+}
+
+export function clearShopListsCache(): void {
+  sessionStorage.removeItem('shoplists');
 }
 
 export async function createShopList(name: string): Promise<void> {
@@ -195,7 +228,30 @@ export async function fetchShopList(id: number): Promise<ShopList> {
     throw new Error('Failed to fetch shop list details');
   }
 
-  return response.json();
+  const data = await response.json();
+  return {
+    id: Number(data.id),
+    name: String(data.name),
+    owner: {
+      id: String(data.owner.id),
+      nickname: String(data.owner.nickname)
+    },
+    members: Array.isArray(data.members) 
+      ? data.members.map((member: any) => ({
+          id: String(member.id),
+          nickname: String(member.nickname)
+        }))
+      : [],
+    items: Array.isArray(data.items) 
+      ? data.items.map((item: any) => ({
+          id: Number(item.id),
+          item_name: String(item.name),
+          brand_name: String(item.brand_name || ''),
+          extra_info: String(item.extra_info || ''),
+          is_bought: Boolean(item.is_bought)
+        }))
+      : []
+  };
 }
 
 export async function searchFlyers(searchTerm: string): Promise<FlyerItem[]> {
@@ -223,7 +279,7 @@ export async function searchFlyers(searchTerm: string): Promise<FlyerItem[]> {
   return data.flyers || [];
 }
 
-export async function addItemToShopList(shopListId: string, item: { item_name: string; brand_name?: string; extra_info?: string; thumbnail?: string }): Promise<void> {
+export async function addItemToShopList(shopListId: string, item: { item_name: string; brand_name?: string; extra_info?: string }): Promise<void> {
   const accessToken = localStorage.getItem('access_token');
   if (!accessToken) {
     throw new Error('Authentication required. Please log in again.');
@@ -247,7 +303,7 @@ export async function addItemToShopList(shopListId: string, item: { item_name: s
   }
 }
 
-export async function editShopListItem(shopListId: number, itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean; thumbnail?: string }): Promise<void> {
+export async function editShopListItem(shopListId: number, itemId: number, updatedData: { item_name?: string; brand_name?: string; extra_info?: string; is_bought?: boolean }): Promise<void> {
   const accessToken = localStorage.getItem('access_token');
   if (!accessToken) {
     throw new Error('No access token found');
@@ -299,8 +355,33 @@ export async function requestShopListShareCode(shopListId: number): Promise<{ sh
   });
 
   if (!response.ok) {
-    throw new Error('Failed to generate share code');
+    throw new Error('Failed to request share code');
   }
 
   return response.json();
+}
+
+export async function fetchShopListMembers(shopListId: number): Promise<ShopListMember[]> {
+  const accessToken = localStorage.getItem('access_token');
+  if (!accessToken) {
+    throw new Error('No access token found');
+  }
+
+  const response = await fetch(getCoreUrl(API_CONFIG.ENDPOINTS.SHOPLIST_MEMBERS(shopListId)), {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch shop list members');
+  }
+
+  const data = await response.json();
+  return Array.isArray(data.members) 
+    ? data.members.map((member: any) => ({
+        id: String(member.id),
+        nickname: String(member.nickname)
+      }))
+    : [];
 } 

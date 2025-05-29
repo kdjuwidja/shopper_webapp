@@ -153,19 +153,6 @@ export default function SearchShopItem() {
                         key={index} 
                         className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700"
                       >
-                        <div className="h-32 bg-white dark:bg-gray-800 flex items-center justify-center">
-                          {item.image_url ? (
-                            <img 
-                              src={item.image_url} 
-                              alt={item.product_name}
-                              className="object-contain max-h-full max-w-full"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full">
-                              <span className="text-gray-400 dark:text-gray-500">No image available</span>
-                            </div>
-                          )}
-                        </div>
                         <div className="p-4">
                           <div className="flex justify-between items-start">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">

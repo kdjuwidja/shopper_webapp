@@ -5,53 +5,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from './components/confirmDialog';
 import { EditItemDialog } from './components/editItemDialog';
-
-// Add ThumbnailPopup component
-const ThumbnailPopup = ({ isOpen, onClose, imageUrl, altText }: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  imageUrl: string; 
-  altText: string;
-}) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
-        </div>
-
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="sm:flex sm:items-start">
-              <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                <div className="mt-2">
-                  <img
-                    src={imageUrl}
-                    alt={altText}
-                    className="w-full h-auto object-contain rounded-lg"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              type="button"
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-              onClick={onClose}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { fetchShopListMembers, type ShopListMember } from '../api/coreApiHandler';
 
 export default function EditShopList() {
   // Get the shop list ID from the URL parameters
@@ -75,18 +29,19 @@ export default function EditShopList() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
-  const [shareError, setShareError] = useState<string | null>(null);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<number | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showMembersDialog, setShowMembersDialog] = useState(false);
+  const [members, setMembers] = useState<ShopListMember[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [membersError, setMembersError] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<{
     id: number;
     item_name: string;
     brand_name: string;
     extra_info: string;
-    thumbnail: string;
   } | null>(null);
-  const [selectedThumbnail, setSelectedThumbnail] = useState<{ url: string; alt: string } | null>(null);
 
   // Debug log to check if userProfile is available
   useEffect(() => {
@@ -137,8 +92,7 @@ export default function EditShopList() {
           id: item.id,
           item_name: item.item_name,
           brand_name: item.brand_name || '',
-          extra_info: item.extra_info || '',
-          thumbnail: item.thumbnail || ''
+          extra_info: item.extra_info || ''
         });
         setShowEditDialog(true);
       }
@@ -148,11 +102,7 @@ export default function EditShopList() {
   // Handle saving edited item
   const handleSaveEditedItem = (updatedData: { item_name: string; brand_name: string; extra_info: string }) => {
     if (itemToEdit) {
-      // Preserve the existing thumbnail when updating other fields
-      editItem(itemToEdit.id, {
-        ...updatedData,
-        thumbnail: itemToEdit.thumbnail
-      });
+      editItem(itemToEdit.id, updatedData);
       setShowEditDialog(false);
       setItemToEdit(null);
     }
@@ -172,6 +122,23 @@ export default function EditShopList() {
         setShowRemoveConfirm(false);
         setItemToRemove(null);
       }
+    }
+  };
+
+  // Handle viewing members
+  const handleViewMembers = async () => {
+    if (!id) return;
+    
+    setIsLoadingMembers(true);
+    setMembersError(null);
+    try {
+      const fetchedMembers = await fetchShopListMembers(parseInt(id));
+      setMembers(fetchedMembers);
+      setShowMembersDialog(true);
+    } catch (error) {
+      setMembersError(error instanceof Error ? error.message : 'Failed to fetch members');
+    } finally {
+      setIsLoadingMembers(false);
     }
   };
 
@@ -243,6 +210,15 @@ export default function EditShopList() {
                     Share
                   </button>
                 )}
+                <button
+                  onClick={handleViewMembers}
+                  className="ml-2 px-3 py-1 text-sm bg-gray-600 hover:bg-gray-700 
+                           text-white font-medium rounded-md 
+                           transition-colors duration-200"
+                  disabled={isLoadingMembers}
+                >
+                  {isLoadingMembers ? 'Loading...' : 'View Members'}
+                </button>
               </div>
               <button
                 onClick={() => setShowLeaveConfirm(true)}
@@ -252,24 +228,6 @@ export default function EditShopList() {
               >
                 Leave
               </button>
-            </div>
-            
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Members:</span>
-              {shopList.members && shopList.members.length > 0 ? (
-                shopList.members.map((member) => (
-                  <div key={member.id} className="flex items-center">
-                    <span className="text-sm text-gray-900 dark:text-white">{member.nickname}</span>
-                    {member.id === shopList.owner.id && (
-                      <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
-                        Owner
-                      </span>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <span className="text-sm text-gray-500 dark:text-gray-400">No members yet</span>
-              )}
             </div>
           </div>
           
@@ -293,14 +251,6 @@ export default function EditShopList() {
                       <li key={item.id} className="py-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
-                            {item.thumbnail && (
-                              <img 
-                                src={item.thumbnail} 
-                                alt={`${item.item_name} thumbnail`} 
-                                className="w-[50px] h-[50px] object-cover rounded mr-3 cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => setSelectedThumbnail({ url: item.thumbnail, alt: item.item_name })}
-                              />
-                            )}
                             <div>
                               <span className="text-sm font-medium text-gray-900 dark:text-white">{item.item_name}</span>
                               {item.brand_name && (
@@ -406,12 +356,37 @@ export default function EditShopList() {
         item={itemToEdit}
       />
 
-      {/* Add ThumbnailPopup component */}
-      <ThumbnailPopup
-        isOpen={!!selectedThumbnail}
-        onClose={() => setSelectedThumbnail(null)}
-        imageUrl={selectedThumbnail?.url || ''}
-        altText={selectedThumbnail?.alt || ''}
+      <ConfirmDialog
+        isOpen={showMembersDialog}
+        onClose={() => setShowMembersDialog(false)}
+        onConfirm={() => setShowMembersDialog(false)}
+        title="Shop List Members"
+        message={
+          <>
+            {membersError ? (
+              <p className="text-sm text-red-500 dark:text-red-400">{membersError}</p>
+            ) : (
+              <div className="space-y-2">
+                {members.length > 0 ? (
+                  members.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <span className="text-sm text-gray-900 dark:text-white">{member.nickname}</span>
+                      {member.id === shopList.owner.id && (
+                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+                          Owner
+                        </span>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No members yet</p>
+                )}
+              </div>
+            )}
+          </>
+        }
+        confirmText="Close"
+        cancelText=""
       />
     </div>
   );

@@ -22,7 +22,6 @@ export default function MemberHome() {
     leaveShopList,
     fetchShopLists,
     joinShopList,
-    setUserProfile,
     updateUserProfile
   } = useMemberHome();
 

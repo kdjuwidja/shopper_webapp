@@ -40,14 +40,6 @@ export function useEditShopList(shopListId: number | null) {
     loadUserProfile();
   }, []);
 
-  // Refresh shop list when user profile is loaded
-  useEffect(() => {
-    if (userProfile && shopListId) {
-      console.log('User profile loaded, refreshing shop list');
-      refreshShopList();
-    }
-  }, [userProfile]);
-
   // Function to fetch shop list data
   const fetchShopListData = async (id: number) => {
     try {

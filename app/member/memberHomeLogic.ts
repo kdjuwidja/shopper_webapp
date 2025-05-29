@@ -93,7 +93,6 @@ export function useMemberHome() {
     createShopList: createShopListState,
     leaveShopList: leaveShopListState,
     fetchShopLists: fetchShopListsState,
-    setUserProfile,
     joinShopList: joinShopListState,
     updateUserProfile: updateUserProfileState
   };
