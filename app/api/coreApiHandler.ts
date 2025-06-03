@@ -17,6 +17,20 @@ export interface ShopListItem {
   brand_name: string;
   extra_info: string;
   is_bought: boolean;
+  available_stores: string[];
+  flyer_details?: Array<{
+    store: string;
+    brand: string;
+    product_name: string;
+    description: string;
+    disclaimer_text: string;
+    original_price: number;
+    pre_price_text: string;
+    price_text: string;
+    post_price_text: string;
+    start_date: number;
+    end_date: number;
+  }>;
 }
 
 export interface ShopList {
@@ -33,8 +47,6 @@ export interface FlyerItem {
   product_name: string;
   description: string;
   disclaimer_text: string;
-  image_url: string;
-  images: string[];
   original_price: number;
   pre_price_text: string;
   price_text: string;
@@ -126,29 +138,16 @@ export async function fetchShopLists(): Promise<ShopList[]> {
               item_name: String(shopItem.name),
               brand_name: String(shopItem.brand_name || ''),
               extra_info: String(shopItem.extra_info || ''),
-              is_bought: Boolean(shopItem.is_bought)
+              is_bought: Boolean(shopItem.is_bought),
+              available_stores: Array.isArray(shopItem.flyer) 
+                ? [...new Set(shopItem.flyer.map((flyer: any) => String(flyer.store)))]
+                : []
             }))
           : []
       }))
     : [];
 
   return shoplists;
-}
-
-export function getCachedShopLists(): ShopList[] | null {
-  const cached = sessionStorage.getItem('shoplists');
-  if (!cached) return null;
-
-  try {
-    return JSON.parse(cached);
-  } catch (e) {
-    sessionStorage.removeItem('shoplists');
-    return null;
-  }
-}
-
-export function clearShopListsCache(): void {
-  sessionStorage.removeItem('shoplists');
 }
 
 export async function createShopList(name: string): Promise<void> {
@@ -248,7 +247,23 @@ export async function fetchShopList(id: number): Promise<ShopList> {
           item_name: String(item.name),
           brand_name: String(item.brand_name || ''),
           extra_info: String(item.extra_info || ''),
-          is_bought: Boolean(item.is_bought)
+          is_bought: Boolean(item.is_bought),
+          available_stores: [],
+          flyer_details: Array.isArray(item.flyer) ? item.flyer.map((flyer: any) => ({
+            store: String(flyer.store),
+            brand: String(flyer.brand),
+            product_name: String(flyer.product_name),
+            description: String(flyer.description),
+            disclaimer_text: String(flyer.disclaimer_text),
+            image_url: String(flyer.image_url),
+            images: Array.isArray(flyer.images) ? flyer.images.map((img: any) => String(img)) : [],
+            original_price: Number(flyer.original_price),
+            pre_price_text: String(flyer.pre_price_text),
+            price_text: String(flyer.price_text),
+            post_price_text: String(flyer.post_price_text),
+            start_date: flyer.start_date,
+            end_date: flyer.end_date
+          })) : []
         }))
       : []
   };

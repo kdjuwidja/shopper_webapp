@@ -7,6 +7,28 @@ import { ConfirmDialog } from './components/confirmDialog';
 import { EditItemDialog } from './components/editItemDialog';
 import { fetchShopListMembers, type ShopListMember } from '../api/coreApiHandler';
 
+export interface ShopListItem {
+  id: number;
+  name: string;
+  brand_name: string;
+  extra_info: string;
+  is_bought: boolean;
+  available_stores: string[];
+  flyer_details?: Array<{
+    store: string;
+    brand: string;
+    product_name: string;
+    description: string;
+    disclaimer_text: string;
+    original_price: number;
+    pre_price_text: string;
+    price_text: string;
+    post_price_text: string;
+    start_date: number;
+    end_date: number;
+  }>;
+}
+
 export default function EditShopList() {
   // Get the shop list ID from the URL parameters
   const { id } = useParams<{ id: string }>();
@@ -42,6 +64,7 @@ export default function EditShopList() {
     brand_name: string;
     extra_info: string;
   } | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
 
   // Debug log to check if userProfile is available
   useEffect(() => {
@@ -140,6 +163,18 @@ export default function EditShopList() {
     } finally {
       setIsLoadingMembers(false);
     }
+  };
+
+  const toggleItemExpansion = (itemId: number) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
   };
 
   // Check if current user is the owner
@@ -250,18 +285,49 @@ export default function EditShopList() {
                     {shopList.items.map((item) => (
                       <li key={item.id} className="py-2">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div>
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">{item.item_name}</span>
-                              {item.brand_name && (
-                                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({item.brand_name})</span>
-                              )}
-                              {item.extra_info && (
-                                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">- {item.extra_info}</span>
-                              )}
-                            </div>
+                          <div className="flex items-center flex-grow">
+                            <button
+                              onClick={() => toggleItemExpansion(item.id)}
+                              className="flex-grow text-left"
+                            >
+                              <div className="flex items-center">
+                                <div>
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">{item.item_name}</span>
+                                  {item.brand_name && (
+                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({item.brand_name})</span>
+                                  )}
+                                  {item.extra_info && (
+                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">- {item.extra_info}</span>
+                                  )}
+                                </div>
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  className={`h-5 w-5 ml-2 text-gray-400 transform transition-transform duration-200 ${expandedItems.has(item.id) ? 'rotate-180' : ''}`} 
+                                  fill="none" 
+                                  viewBox="0 0 24 24" 
+                                  stroke="currentColor"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
+                            </button>
                           </div>
                           <div className="flex items-center space-x-2">
+                            {item.flyer_details && item.flyer_details.length > 0 && (
+                              <div className="mr-8 min-w-[200px]">
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Hot deals at:</span>
+                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                  {[...new Set(item.flyer_details.map(flyer => flyer.store))].map((store, index) => (
+                                    <span 
+                                      key={index}
+                                      className="inline-block px-2.5 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full"
+                                    >
+                                      {store}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             <div className="flex items-center">
                               <input
                                 type="checkbox"
@@ -297,6 +363,35 @@ export default function EditShopList() {
                             </button>
                           </div>
                         </div>
+                        {expandedItems.has(item.id) && item.flyer_details && item.flyer_details.length > 0 && (
+                          <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                            <div className="flex overflow-x-auto gap-3 pb-2">
+                              {item.flyer_details.map((flyer, index) => (
+                                <div key={index} className="flex-none w-64 bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+                                  <div className="space-y-2">
+                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                      {flyer.store}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                                      {flyer.brand} - {flyer.product_name}
+                                    </div>
+                                    {flyer.description && (
+                                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                                        {flyer.description}
+                                      </div>
+                                    )}
+                                    <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                                      {flyer.price_text}
+                                    </div>
+                                    <div className="text-xs text-gray-400 dark:text-gray-500">
+                                      {new Date(flyer.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })} - {new Date(flyer.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

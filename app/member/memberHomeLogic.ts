@@ -22,6 +22,12 @@ export function useMemberHome() {
     try {
       const data = await fetchShopLists();
       setShopLists(data);
+
+      // Extract item IDs from shop lists
+      const itemIds = data.flatMap(list => list.items?.map(item => item.id) || []);
+      if (itemIds.length > 0) {
+        
+      }
     } catch (error) {
       console.error('Error fetching shop lists:', error);
       setShopLists([]);

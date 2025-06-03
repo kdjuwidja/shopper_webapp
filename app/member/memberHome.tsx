@@ -13,6 +13,25 @@ export interface UserProfile {
   updated_at: string;
 }
 
+export interface ShopListItem {
+  id: number;
+  name: string;
+  brand_name: string;
+  extra_info: string;
+  is_bought: boolean;
+  available_stores: string[];
+}
+
+export interface ShopList {
+  id: number;
+  name: string;
+  owner: {
+    id: string;
+    nickname: string;
+  };
+  items: ShopListItem[];
+}
+
 export default function MemberHome() {
   const {
     userProfile,
@@ -201,6 +220,19 @@ export default function MemberHome() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             Owner: <span className="font-medium text-gray-700 dark:text-gray-300">{list.owner.nickname}</span>
                           </p>
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Hot deals at:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {[...new Set(list.items.flatMap(item => item.available_stores || []))].map((store, index) => (
+                                <span 
+                                  key={index}
+                                  className="inline-block px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full"
+                                >
+                                  {store}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
