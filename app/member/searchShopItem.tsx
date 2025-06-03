@@ -1,9 +1,11 @@
 import { TopBar } from './components/topBar';
 import { useParams, useNavigate } from 'react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { UserProfile } from '../common/model/userprofile';
 import { useSearchShopItem } from './searchShopItemLogic';
 import type { FlyerItem } from '../api/coreApiHandler';
+import { ConfirmDialog } from './components/confirmDialog';
+import { ROUTES } from '../config/routes';
 
 export default function SearchShopItem() {
   // Get the shop list ID from the URL parameters
@@ -34,18 +36,19 @@ export default function SearchShopItem() {
 
   // Handle adding item and navigation
   const onAddFromSearch = async () => {
+    if (!id) return;
     const success = await handleAddFromSearch();
     if (success) {
-      navigate(`/member/shoplist/${id}`);
+      navigate(ROUTES.SHOPLIST(id));
     }
   };
 
   // Handle adding item from flyer and navigation
   const onAddFromFlyer = async (flyerItem: FlyerItem) => {
-    console.log('Adding item from flyer:', flyerItem);
+    if (!id) return;
     const success = await handleAddFromFlyer(flyerItem);
     if (success) {
-      navigate(`/member/shoplist/${id}`);
+      navigate(ROUTES.SHOPLIST(id));
     }
   };
 
@@ -104,12 +107,9 @@ export default function SearchShopItem() {
                              dark:text-white"
                   />
                   <button
-                    className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
-                      searchTerm.trim() === '' || isAddingItem
-                        ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    }`}
-                    disabled={searchTerm.trim() === '' || isAddingItem}
+                    className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors
+                    ${isAddingItem ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isAddingItem}
                     onClick={onAddFromSearch}
                   >
                     {isAddingItem ? 'Adding...' : 'Add to List'}
@@ -177,10 +177,8 @@ export default function SearchShopItem() {
                               {formatPrice(item.pre_price_text, item.price_text, item.post_price_text)}
                             </span>
                             <button
-                              className={`px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 
-                                       text-white font-medium rounded-md 
-                                       transition-colors duration-200
-                                       ${isAddingItem ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors
+                              ${isAddingItem ? 'opacity-50 cursor-not-allowed' : ''}`}
                               disabled={isAddingItem}
                               onClick={() => onAddFromFlyer(item)}
                             >

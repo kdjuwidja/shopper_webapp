@@ -4,14 +4,10 @@ import { TopBar } from './components/topBar';
 import { useMemberHome } from './memberHomeLogic';
 import { useState } from 'react';
 import { InitializeUserProfile } from './components/initializeUserProfile';
-
-export interface UserProfile {
-  id: string;
-  nickname: string;
-  postal_code: string;
-  created_at: string;
-  updated_at: string;
-}
+import type { UserProfile } from '../common/model/userprofile';
+import { useNavigate } from 'react-router';
+import { useEffect } from 'react';
+import { ROUTES } from '../config/routes';
 
 export interface ShopListItem {
   id: number;
@@ -93,9 +89,9 @@ export default function MemberHome() {
     fetchShopLists();
   };
 
-  const handleShopListClick = (id: number) => {
+  const handleShopListClick = (id: string) => {
     const basename = import.meta.env.VITE_BASE_PATH || '';
-    window.location.href = `${basename}/member/shoplist/${id}`;
+    window.location.href = `${basename}${ROUTES.SHOPLIST(id)}`;
   };
 
   const handleProfileCreate = async (nickname: string, postalCode: string) => {
@@ -201,7 +197,7 @@ export default function MemberHome() {
                         <div
                           key={list.id}
                           className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                          onClick={() => handleShopListClick(list.id)}
+                          onClick={() => handleShopListClick(list.id.toString())}
                         >
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">{list.name}</h3>

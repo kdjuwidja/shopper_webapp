@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { ConfirmDialog } from './components/confirmDialog';
 import { EditItemDialog } from './components/editItemDialog';
 import { fetchShopListMembers, type ShopListMember } from '../api/coreApiHandler';
+import { ROUTES } from '../config/routes';
 
 export interface ShopListItem {
   id: number;
@@ -82,7 +83,7 @@ export default function EditShopList() {
     const success = await leaveShopList();
     if (success) {
       const basename = import.meta.env.VITE_BASE_PATH || '';
-      window.location.href = `${basename}/member`;
+      window.location.href = `${basename}${ROUTES.MEMBER}`;
     }
   };
 
@@ -99,7 +100,8 @@ export default function EditShopList() {
 
   // Handle navigation to search page
   const handleAddItem = () => {
-    navigate(`/member/searchshopitem/${id}`);
+    if (!id) return;
+    navigate(ROUTES.SEARCH_ITEM(id));
   };
 
   // Handle editing an item
@@ -224,7 +226,7 @@ export default function EditShopList() {
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <button
-                  onClick={() => navigate('/member')}
+                  onClick={() => navigate(ROUTES.MEMBER)}
                   className="mr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                   aria-label="Go back"
                 >

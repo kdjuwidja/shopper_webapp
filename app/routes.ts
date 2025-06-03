@@ -22,15 +22,15 @@ export default [
     file: "error/error.tsx"
   },
   {
-    path: "/member",
+    path: "/member/v2",
     file: "member/memberHome.tsx"
   },
   {
-    path: "/member/shoplist/:id",
+    path: "/member/v2/shoplist/:id",
     file: "member/editshoplist.tsx"
   },
   {
-    path: "/member/searchshopitem/:id",
+    path: "/member/v2/searchshopitem/:id",
     file: "member/searchShopItem.tsx"
   }
 ] satisfies RouteConfig;

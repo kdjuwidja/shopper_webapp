@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { API_CONFIG, getCallbackUrl, getAuthUrl } from '../api/apiConfig';
+import { ROUTES } from '../config/routes';
 
 export function useCallback() {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ export function useCallback() {
       console.log("redirecting to login with error:", error);
       navigate(`/login?error=${encodeURIComponent("User name or password is incorrect.")}`);
     } else {
-      navigate('/member');
+      navigate(ROUTES.MEMBER);
     }
   }, [error]);
 
