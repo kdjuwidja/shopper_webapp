@@ -24,21 +24,21 @@ export const API_CONFIG = {
     TOKEN: '/auth/token',
     
     // User Profile Endpoints
-    USER_PROFILE: '/core/v1/user',
+    USER_PROFILE: '/core/v2/user',
     
     // Shoplist Endpoints
     SHOPLIST_BASE: '/core/v2/shoplist',
     SHOPLIST_BY_ID: (id: string | number) => `/core/v2/shoplist/${id}`,
-    SHOPLIST_ITEMS: (id: string | number) => `/core/v1/shoplist/${id}/item`,
-    SHOPLIST_ITEM: (id: string | number, itemId: string | number) => `/core/v1/shoplist/${id}/item/${itemId}`,
-    SHOPLIST_LEAVE: (id: string | number) => `/core/v1/shoplist/${id}/leave`,
-    SHOPLIST_SHARE_CODE: (id: string | number) => `/core/v1/shoplist/${id}/share-code`,
-    SHOPLIST_REVOKE_SHARE_CODE: (id: string | number) => `/core/v1/shoplist/${id}/share-code/revoke`,
-    SHOPLIST_JOIN: '/core/v1/shoplist/join',
+    SHOPLIST_ITEMS: (id: string | number) => `/core/v2/shoplist/${id}/item`,
+    SHOPLIST_ITEM: (id: string | number, itemId: string | number) => `/core/v2/shoplist/${id}/item/${itemId}`,
+    SHOPLIST_LEAVE: (id: string | number) => `/core/v2/shoplist/${id}/leave`,
+    SHOPLIST_SHARE_CODE: (id: string | number) => `/core/v2/shoplist/${id}/share-code`,
+    SHOPLIST_REVOKE_SHARE_CODE: (id: string | number) => `/core/v2/shoplist/${id}/share-code/revoke`,
+    SHOPLIST_JOIN: '/core/v2/shoplist/join',
     SHOPLIST_MEMBERS: (id: string | number) => `/core/v2/shoplist/${id}/members`,
     
     // Search Endpoints
-    SEARCH_FLYERS: '/core/v1/search/flyers',
+    SEARCH_FLYERS: '/core/v2/search/flyers',
   },
 } as const;
 
