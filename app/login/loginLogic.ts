@@ -28,7 +28,7 @@ export function useLogin() {
         authUrl.searchParams.append('client_id', API_CONFIG.CLIENT_ID);
         authUrl.searchParams.append('redirect_uri', getCallbackUrl());
         authUrl.searchParams.append('state', state);
-        authUrl.searchParams.append('scope', 'profile');
+        authUrl.searchParams.append('scope', 'profile shoplist search');
         if (error) {
           authUrl.searchParams.append('error', error);
         }
