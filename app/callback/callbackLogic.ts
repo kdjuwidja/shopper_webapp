@@ -49,8 +49,6 @@ export function useCallback() {
             code: code,
             redirect_uri: getCallbackUrl(),
             client_id: API_CONFIG.CLIENT_ID,
-            client_secret: API_CONFIG.CLIENT_SECRET,
-            state: state,
           }),
         });
 
